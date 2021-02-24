@@ -1,26 +1,58 @@
-import React from 'react';
-import logo from './logo.svg';
-import './App.css';
+import React, { Fragment, useState } from 'react'
 
-function App() {
-  return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
-  );
+type FormElement = React.FormEvent<HTMLFormElement>
+
+interface ITodo {
+  todo: string
+  complete: boolean
 }
 
-export default App;
+const App: React.FC = () => {
+  const [todo, setTodo] = useState<string>('')
+  const [todos, setTodos] = useState<ITodo[]>([])
+
+  const handleSubmit = (e: FormElement): void => {
+    e.preventDefault()
+    addTodo(todo)
+    setTodo('')
+  }
+
+  const addTodo = (todo: string): void => {
+    const newTodos: ITodo[] = [...todos, { todo, complete: false }]
+    setTodos(newTodos)
+  }
+
+  const completeTodo = (idx: number): void => {
+    const newTodos: ITodo[] = [...todos]
+    let isCompleted: boolean = newTodos[idx].complete
+    newTodos[idx].complete = !isCompleted
+    setTodos(newTodos)
+  }
+
+  const removeTodo = (idx: number): void => {
+    const newTodos: ITodo[] = [...todos]
+    newTodos.splice(idx, 1)
+    setTodos(newTodos)
+  }
+
+  return (
+    <>
+      <form onSubmit={handleSubmit}>
+        <h1>ToDo List</h1>
+        <input type="text" value={todo} onChange={e => setTodo(e.target.value)} />
+        <button type='submit'>Add ToDo</button>
+      </form>
+      <section>
+        {todos.map((todo: ITodo, idx: number) => (
+          <Fragment key={idx}>
+            <div style={{ textDecoration: todo.complete ? 'line-through' : '' }}>{todo.todo}</div>
+            <button type='button' onClick={() => completeTodo(idx)}>{todo.complete ? "Incomplete" : "Complete"}</button>
+            <button type='button' onClick={() => removeTodo(idx)}>&times;</button>
+          </Fragment>
+        ))}
+      </section>
+    </>
+  )
+}
+
+export default App
